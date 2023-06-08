@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import rasterio
+
+# Open the Landsat 7 bands
+band4 = rasterio.open('path/to/band4.tif')  # Red band
+band5 = rasterio.open('path/to/band5.tif')  # Near-infrared band
+
+# Read the data and convert it to float arrays
+red = band4.read(1).astype(float)
+nir = band5.read(1).astype(float)
+
+# Define the NDVI formula
+ndvi = (nir - red) / (nir + red)
+
+# Set the range of values for NDVI visualization
+ndvi_min = -1.0
+ndvi_max = 1.0
+
+# Normalize the NDVI values for visualization purposes
+ndvi_norm = (ndvi - ndvi_min) / (ndvi_max - ndvi_min)
+
+# Plotting the NDVI
+plt.figure(figsize=(10, 10))
+plt.imshow(ndvi_norm, cmap='RdYlGn')
+plt.colorbar(label='NDVI')
+plt.title('Normalized Difference Vegetation Index (NDVI)')
+plt.show()
+
+# Save the NDVI result as a new raster file
+profile = band4.profile
+profile.update(dtype=rasterio.float32, count=1)
+
+with rasterio.open('path/to/ndvi.tif', 'w', **profile) as dst:
+    dst.write(ndvi, 1)
